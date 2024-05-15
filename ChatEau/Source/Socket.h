@@ -13,7 +13,7 @@ class Socket
 {
 public:
 	static int Init();
-	static void Cleanup();
+	static int Cleanup();
 
 public:
 	int Create();

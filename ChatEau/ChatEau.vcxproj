@@ -127,11 +127,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Application.cpp" />
     <ClCompile Include="Source\Log.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\Socket.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Application.h" />
     <ClInclude Include="Source\Log.h" />
     <ClInclude Include="Source\Socket.h" />
   </ItemGroup>

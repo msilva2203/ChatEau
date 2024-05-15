@@ -8,9 +8,9 @@ int Socket::Init()
 	return Result;
 }
 
-void Socket::Cleanup()
+int Socket::Cleanup()
 {
-	WSACleanup();
+	return WSACleanup();
 }
 
 int Socket::Create()
