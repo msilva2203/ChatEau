@@ -8,9 +8,15 @@ BOOL WINAPI ConsoleHandler(DWORD);
 
 Application App;
 
-int main(void)
+int main(int argc, char** argv)
 {
+	std::string ServerIP = "127.0.0.1";
 	int Result;
+
+	if (argc >= 2)
+	{
+		ServerIP = argv[1];
+	}
 
 	LOG(LOG_INFO, "Initializing socket system");
 
@@ -29,7 +35,7 @@ int main(void)
 	//}
 
 	// 3. Run application
-	App.Run();
+	App.Run(ServerIP.c_str());
 
 	LOG(LOG_INFO, "Cleaning socket system");
 

@@ -10,12 +10,12 @@ class Application
 {
 public:
 	Application();
-	void Run();
+	void Run(const char* ServerIP);
 	void Close();
 	void BroadcastMessage(FMessage& Message, Socket* SendingClient);
 
 private:
-	void SetupListeningSocket();
+	void SetupListeningSocket(const char* ServerIP);
 	void HandleConnections();
 	void ProcessClient(Socket* Client, int Id);
 

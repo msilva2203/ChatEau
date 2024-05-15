@@ -13,12 +13,12 @@ Application::Application() :
 {
 }
 
-void Application::Run()
+void Application::Run(const char* ServerIP)
 {
 	LOG(LOG_INFO, "Starting Application");
 
 	// 1. Setup listening socket
-	SetupListeningSocket();
+	SetupListeningSocket(ServerIP);
 
 	// 2. Accept client connections
 	m_ListeningThread = std::thread(&Application::HandleConnections, this);
@@ -49,7 +49,7 @@ void Application::BroadcastMessage(FMessage& Message, Socket* SendingClient)
 	}
 }
 
-void Application::SetupListeningSocket()
+void Application::SetupListeningSocket(const char* ServerIP)
 {
 	int Result;
 	sockaddr_in Hint;
@@ -65,7 +65,7 @@ void Application::SetupListeningSocket()
 	// 2. Setup hint data
 	Hint.sin_family = AF_INET;
 	Hint.sin_port = htons(PORT);
-	Hint.sin_addr.S_un.S_addr = INADDR_ANY;
+	inet_pton(AF_INET, ServerIP, &Hint.sin_addr);
 
 	// 3. Bind socket
 	Result = m_Listening.Bind(Hint);
