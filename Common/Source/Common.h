@@ -9,7 +9,7 @@
 #define MAX_NAME_SIZE   100
 #define MAX_BUF_SIZE    4096
 
-#define PORT            54000
+#define PORT            9876
 
 struct COMMON_API FMessage
 {
