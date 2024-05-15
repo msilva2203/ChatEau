@@ -65,7 +65,8 @@ void Application::SetupListeningSocket(const char* ServerIP)
 	// 2. Setup hint data
 	Hint.sin_family = AF_INET;
 	Hint.sin_port = htons(PORT);
-	inet_pton(AF_INET, ServerIP, &Hint.sin_addr);
+	Hint.sin_addr.S_un.S_addr = INADDR_ANY;
+	//inet_pton(AF_INET, ServerIP, &Hint.sin_addr);
 
 	// 3. Bind socket
 	Result = m_Listening.Bind(Hint);
