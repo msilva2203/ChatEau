@@ -81,7 +81,6 @@ void Application::Receiver()
 	} while (Received >= 0);
 
 	m_Connection.Close();
-	m_InputReader.detach();
 }
 
 void Application::InputReader()

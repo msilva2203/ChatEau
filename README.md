@@ -14,13 +14,21 @@ This is a simple cross-platform chat application developed in C++. It allows mul
 
 ## Installation
 
+### Prerequisites
+- Visual Studio 2019 or later.
+
+### Building the application
+1. Clone the repository `git clone https://github.com/msilva2203/ChatEau.git`
+2. Open solution in Visual Studio
+3. Build solution
+
 ## Usage
 
 ## Contributing
 1. Fork the repository.
-2. Create a new branch (git checkout -b feature-branch).
-3. Commit your changes (git commit -m 'Add some feature').
-4. Push to the branch (git push origin feature-branch).
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Commit your changes (`git commit -m 'Add some feature'`).
+4. Push to the branch (`git push origin feature-branch`).
 5. Open a pull request.
 
 ## License
