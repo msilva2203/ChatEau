@@ -13,6 +13,7 @@ This is a simple cross-platform chat application developed in C++. It allows mul
 - C++11 or higher
 
 ## Installation
+The installation process will be improved later.
 
 ### Prerequisites
 - Visual Studio 2019 or later.
