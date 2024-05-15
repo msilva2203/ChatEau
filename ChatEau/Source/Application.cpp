@@ -42,6 +42,7 @@ void Application::Close()
 void Application::SetupListeningSocket()
 {
 	int Result;
+	sockaddr_in Hint;
 
 	// 1. Create socket
 	Result = m_Listening.Create();
@@ -51,10 +52,15 @@ void Application::SetupListeningSocket()
 		return;
 	}
 
-	// 2. Bind socket
-	Result = m_Listening.Bind();
+	// 2. Setup hint data
+	Hint.sin_family = AF_INET;
+	Hint.sin_port = htons(54000);
+	Hint.sin_addr.S_un.S_addr = INADDR_ANY;
 
-	// 3. Make socket listen
+	// 3. Bind socket
+	Result = m_Listening.Bind(Hint);
+
+	// 4. Make socket listen
 	Result = m_Listening.Listen();
 }
 
@@ -101,7 +107,7 @@ void Application::ProcessClient(Socket Client)
 		if (Received == 0) break;
 
 		// 3. Process message
-		if (Buf[strlen(Buf) - 1] == '\n') Buf[strlen(Buf) - 1] = '\0';
+		while ((Buf[strlen(Buf) - 1] == '\n')) Buf[strlen(Buf) - 1] = '\0';
 
 		std::cout << Buf << std::endl;
 

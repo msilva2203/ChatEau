@@ -19,13 +19,16 @@ int Socket::Create()
 	return m_Sock;
 }
 
-int Socket::Bind()
+int Socket::Bind(sockaddr_in Hint)
 {
-	m_Hint.sin_family = AF_INET;
-	m_Hint.sin_port = htons(54000);
-	m_Hint.sin_addr.S_un.S_addr = INADDR_ANY;
-
+	m_Hint = Hint;
 	return bind(m_Sock, (sockaddr*)&m_Hint, sizeof(m_Hint));
+}
+
+int Socket::Connect(sockaddr_in Hint)
+{
+	m_Hint = Hint;
+	return connect(m_Sock, (sockaddr*)&m_Hint, sizeof(m_Hint));
 }
 
 int Socket::Listen()

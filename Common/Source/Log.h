@@ -3,9 +3,11 @@
 #include <string>
 #include <string.h>
 
+#include "Common.h"
+
 #define LOG_BUF_SIZE  4096
 
-class Log
+class COMMON_API Log
 {
 public:
 	enum class EType : unsigned char

@@ -3,13 +3,15 @@
 #include <WS2tcpip.h>
 #include <string>
 
+#include "Common.h"
+
 #pragma comment (lib, "ws2_32.lib")
 
 #ifndef _WIN32
 typedef SOCKET int;
 #endif
 
-class Socket
+class COMMON_API Socket
 {
 public:
 	static int Init();
@@ -17,7 +19,8 @@ public:
 
 public:
 	int Create();
-	int Bind();
+	int Bind(sockaddr_in Hint);
+	int Connect(sockaddr_in Hint);
 	int Listen();
 	int AcceptConnection(Socket* OutConnection);
 	int Receive(char* Buffer, int Length);
