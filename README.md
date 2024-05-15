@@ -24,7 +24,7 @@ This is a simple chat application developed in C++. It allows multiple users to 
 5. Open a pull request.
 
 ## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE) file for details.
 
 ## Contact
 For any questions or suggestions, feel free to open an issue or contact me at marcosilva2203@outllok.pt.
