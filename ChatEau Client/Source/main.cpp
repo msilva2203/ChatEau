@@ -7,13 +7,17 @@
 #include "Socket.h"
 #include "Log.h"
 
-#define BUF_SIZE 4096
-
 Application App;
 
-int main(void)
+int main(int argc, char** argv)
 {
+	std::string ServerIP = "127.0.0.1";
 	int Result;
+
+	if (argc >= 2)
+	{
+		ServerIP = argv[1];
+	}
 
 	LOG(LOG_INFO, "Initializing socket system");
 
@@ -26,7 +30,8 @@ int main(void)
 	}
 
 	// 2. Run client application
-	App.Run();
+	LOG(LOG_INFO, "Using IP: %s", ServerIP.c_str());
+	App.Run(ServerIP.c_str());
 
 	LOG(LOG_INFO, "Cleaning socket system");
 

@@ -9,11 +9,11 @@ class Application
 public:
 	Application();
 
-	void Run();
+	void Run(const char* ServerIP);
 	void Close();
 
 private:
-	void SetupConnectionSocket();
+	void SetupConnectionSocket(const char* ServerIP);
 	void Receiver();
 	void InputReader();
 

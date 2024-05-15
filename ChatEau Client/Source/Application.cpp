@@ -3,8 +3,6 @@
 #include "Application.h"
 #include "Log.h"
 
-#define BUF_SIZE 4096
-
 Application::Application() :
 	m_Connection(Socket()),
 	m_Receiver(),
@@ -12,10 +10,10 @@ Application::Application() :
 {
 }
 
-void Application::Run()
+void Application::Run(const char* ServerIP)
 {
 	// 1. Setup connection socket
-	SetupConnectionSocket();
+	SetupConnectionSocket(ServerIP);
 
 	// 2. Create receiver thread
 	m_Receiver = std::thread(&Application::Receiver, this);
@@ -34,7 +32,7 @@ void Application::Close()
 
 }
 
-void Application::SetupConnectionSocket()
+void Application::SetupConnectionSocket(const char* ServerIP)
 {
 	int Result;
 	sockaddr_in Hint;
@@ -44,21 +42,19 @@ void Application::SetupConnectionSocket()
 	if (Result == INVALID_SOCKET)
 	{
 		LOG(LOG_ERROR, "Failed to create connection socket");
-		std::cin.get();
 		exit(EXIT_FAILURE);
 	}
 
 	// 2. Setup hint data
 	Hint.sin_family = AF_INET;
-	Hint.sin_port = htons(54000);
-	inet_pton(AF_INET, "127.0.0.1", &Hint.sin_addr);
+	Hint.sin_port = htons(PORT);
+	inet_pton(AF_INET, ServerIP, &Hint.sin_addr);
 
 	// 3. Connect socket
 	Result = m_Connection.Connect(Hint);
 	if (Result == SOCKET_ERROR)
 	{
 		LOG(LOG_ERROR, "Failed to connect socket");
-		std::cin.get();
 		exit(EXIT_FAILURE);
 	}
 }
@@ -66,15 +62,15 @@ void Application::SetupConnectionSocket()
 void Application::Receiver()
 {
 	int Received;
-	char Buf[BUF_SIZE];
+	FMessage Message;
 
 	do
 	{
-		memset(Buf, 0, BUF_SIZE);
-		Received = m_Connection.Receive(Buf, BUF_SIZE);
+		memset(&Message, 0, MSG_SIZE);
+		Received = m_Connection.Receive(reinterpret_cast<char*>(&Message), MSG_SIZE);
 		if (Received > 0)
 		{
-			std::cout << "SERVER> " << Buf << std::endl;
+			std::cout << Message.Name << "> " << Message.Message << std::endl;
 			std::cout << ">";
 		}
 
