@@ -2,8 +2,6 @@
 
 #include "ServerApplication.h"
 
-#define BUF_SIZE      4096
-#define SERVER_NAME   "SERVER"
 
 ServerApplication::ServerApplication() :
 	m_Listening(StreamSocket()),
@@ -59,7 +57,7 @@ void ServerApplication::BroadcastServerMessage(const char* Content, ...)
 	va_start(Args, Content);
 
 	memset(&Message, 0, MSG_SIZE);
-	snprintf(Message.Name, MAX_NAME_SIZE, "@%s", SERVER_NAME);
+	snprintf(Message.Name, MAX_NAME_SIZE, "@%s", m_Config.Name);
 	snprintf(Message.Message, MAX_BUF_SIZE, Content, Args);
 
 	va_end(Args);
@@ -99,6 +97,8 @@ int ServerApplication::SetupListeningSocket()
 		LOG(LOG_ERROR, "Failed to listen socket");
 		return -1;
 	}
+
+	LOG(LOG_INFO, "Socket created with IP address: %s", m_Config.IP.c_str());
 	return 0;
 }
 
@@ -139,15 +139,16 @@ void ServerApplication::ProcessClient(StreamSocket* Client, int Id)
 	LOG(LOG_INFO, "Processing new client");
 
 	BroadcastServerMessage("Client %d joined chat session!", Id);
+	std::cout << Id << std::endl;
 
 	while (bRunning)
 	{
 		// 1. Zero the message buffer
-		memset(Buf, 0, BUF_SIZE);
+		memset(Buf, 0, MAX_BUF_SIZE);
 		memset(&Message, 0, MSG_SIZE);
 
 		// 2. Wait for client message
-		int Received = Client->Receive(Buf, BUF_SIZE);
+		int Received = Client->Receive(Buf, MAX_BUF_SIZE);
 		if (Received == SOCKET_ERROR)
 		{
 			LOG(LOG_ERROR, "Failed to receive client message");
@@ -157,7 +158,7 @@ void ServerApplication::ProcessClient(StreamSocket* Client, int Id)
 
 		// 3. Process message
 		while ((Buf[strlen(Buf) - 1] == '\n')) Buf[strlen(Buf) - 1] = '\0';
-		snprintf(Message.Name, MAX_NAME_SIZE, "@CLIENT %d", Id); // Name
+		snprintf(Message.Name, MAX_NAME_SIZE, "@client %d", Id); // Name
 		strcpy_s(Message.Message, Buf); // Message
 
 		std::cout << Buf << std::endl;

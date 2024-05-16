@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #ifdef COMMON_EXPORT
 #define COMMON_API __declspec(dllexport)
 #else
@@ -11,13 +13,13 @@
 
 #define PORT            54000
 
-struct COMMON_API FMessage
+struct FMessage
 {
 	char Message[MAX_BUF_SIZE];
 	char Name[MAX_NAME_SIZE];
 };
 
-struct COMMON_API FConfig
+struct FConfig
 {
 	char Name[MAX_NAME_SIZE];
 	std::string IP;

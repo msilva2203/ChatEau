@@ -15,7 +15,6 @@ int main(int argc, char** argv)
 	int Result;
 
 	// 1. Initialize configuration elements
-	memset(&Config, 0, sizeof(Config));
 	Config.IP = "127.0.0.1";
 	Config.Port = PORT;
 

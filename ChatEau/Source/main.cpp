@@ -4,6 +4,9 @@
 #include "ServerApplication.h"
 #include "Log.h"
 
+
+#define SERVER_NAME   "server"
+
 BOOL WINAPI ConsoleHandler(DWORD);
 
 ServerApplication App;
@@ -14,17 +17,21 @@ int main(int argc, char** argv)
 	int Result;
 
 	// 1. Initialize configuration elements
-	memset(&Config, 0, sizeof(Config));
 	Config.IP = "127.0.0.1";
 	Config.Port = PORT;
+	strcpy_s(Config.Name, SERVER_NAME);
 
 	if (argc >= 2)
 	{
-		Config.IP = argv[1];
+		strcpy_s(Config.Name, argv[1]);
 	}
 	if (argc >= 3)
 	{
-		Config.Port = atoi(argv[2]);
+		Config.IP = argv[2];
+	}
+	if (argc >= 4)
+	{
+		Config.Port = atoi(argv[3]);
 	}
 
 	LOG(LOG_INFO, "Initializing socket system");
