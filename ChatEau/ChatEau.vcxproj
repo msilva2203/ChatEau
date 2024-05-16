@@ -71,10 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>../Common/Source/;$(IncludePath)</IncludePath>
+    <IncludePath>../Networking/Source/;../Common/Source/;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>../Common/Source/;$(IncludePath)</IncludePath>
+    <IncludePath>../Networking/Source/;../Common/Source/;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -133,15 +133,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Application.cpp" />
+    <ClCompile Include="Source\ServerApplication.cpp" />
     <ClCompile Include="Source\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Application.h" />
+    <ClInclude Include="Source\ServerApplication.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.vcxproj">
       <Project>{45ab1ba8-d3e2-4379-a6aa-472c172deb35}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Networking\Networking.vcxproj">
+      <Project>{3b4a9b22-731e-4fbf-bcec-e1a87f746a08}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

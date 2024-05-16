@@ -17,4 +17,11 @@ struct COMMON_API FMessage
 	char Name[MAX_NAME_SIZE];
 };
 
+struct COMMON_API FConfig
+{
+	char Name[MAX_NAME_SIZE];
+	std::string IP;
+	int Port;
+};
+
 #define MSG_SIZE        sizeof(FMessage)

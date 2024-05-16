@@ -1,11 +1,12 @@
 #include <iostream>
 
-#include "Application.h"
+#include "ServerApplication.h"
 
-#define BUF_SIZE 4096
+#define BUF_SIZE      4096
+#define SERVER_NAME   "SERVER"
 
-Application::Application() :
-	m_Listening(Socket()),
+ServerApplication::ServerApplication() :
+	m_Listening(StreamSocket()),
 	m_ListeningThread(std::thread()),
 	m_Clients(),
 	m_ClientThreads(),
@@ -13,15 +14,16 @@ Application::Application() :
 {
 }
 
-void Application::Run(const char* ServerIP)
+void ServerApplication::Run()
 {
 	LOG(LOG_INFO, "Starting Application");
 
 	// 1. Setup listening socket
-	SetupListeningSocket(ServerIP);
+	if (SetupListeningSocket() < 0)
+		return;
 
 	// 2. Accept client connections
-	m_ListeningThread = std::thread(&Application::HandleConnections, this);
+	m_ListeningThread = std::thread(&ServerApplication::HandleConnections, this);
 	m_ListeningThread.join();
 
 	// 3. Close listening socket
@@ -34,13 +36,13 @@ void Application::Run(const char* ServerIP)
 	}
 }
 
-void Application::Close()
+void ServerApplication::Close()
 {
 	LOG(LOG_INFO, "Closing Application");
 	bRunning = false;
 }
 
-void Application::BroadcastMessage(FMessage& Message, Socket* SendingClient)
+void ServerApplication::BroadcastMessage(FMessage& Message, StreamSocket* SendingClient)
 {
 	for (auto& ChatClient : m_Clients)
 	{
@@ -49,35 +51,60 @@ void Application::BroadcastMessage(FMessage& Message, Socket* SendingClient)
 	}
 }
 
-void Application::SetupListeningSocket(const char* ServerIP)
+void ServerApplication::BroadcastServerMessage(const char* Content, ...)
+{
+	FMessage Message;
+
+	va_list Args;
+	va_start(Args, Content);
+
+	memset(&Message, 0, MSG_SIZE);
+	snprintf(Message.Name, MAX_NAME_SIZE, "@%s", SERVER_NAME);
+	snprintf(Message.Message, MAX_BUF_SIZE, Content, Args);
+
+	va_end(Args);
+
+	BroadcastMessage(Message, nullptr);
+}
+
+int ServerApplication::SetupListeningSocket()
 {
 	int Result;
 	sockaddr_in Hint;
 
-	// 1. Create socket
-	Result = m_Listening.Create();
+	// 1. Setup hint data
+	Hint.sin_family = AF_INET;
+	Hint.sin_port = htons(m_Config.Port);
+	Hint.sin_addr.S_un.S_addr = INADDR_ANY;
+	//inet_pton(AF_INET, m_Config.IP.c_str(), &Hint.sin_addr);
+
+	// 2. Create socket
+	Result = m_Listening.Create(Hint);
 	if (Result == INVALID_SOCKET)
 	{
 		LOG(LOG_ERROR, "Failed to create listening socket");
-		return;
+		return -1;
 	}
-
-	// 2. Setup hint data
-	Hint.sin_family = AF_INET;
-	Hint.sin_port = htons(PORT);
-	Hint.sin_addr.S_un.S_addr = INADDR_ANY;
-	//inet_pton(AF_INET, ServerIP, &Hint.sin_addr);
-
 	// 3. Bind socket
-	Result = m_Listening.Bind(Hint);
-
+	Result = m_Listening.Bind();
+	if (Result == SOCKET_ERROR)
+	{
+		LOG(LOG_ERROR, "Failed to bind listening socket");
+		return -1;
+	}
 	// 4. Make socket listen
 	Result = m_Listening.Listen();
+	if (Result == SOCKET_ERROR)
+	{
+		LOG(LOG_ERROR, "Failed to listen socket");
+		return -1;
+	}
+	return 0;
 }
 
-void Application::HandleConnections()
+void ServerApplication::HandleConnections()
 {
-	Socket* NewClient;
+	StreamSocket* NewClient;
 	int Result;
 
 	LOG(LOG_INFO, "Listening for client connections");
@@ -85,10 +112,10 @@ void Application::HandleConnections()
 	while (bRunning)
 	{
 		// 1. Create new client socket
-		m_Clients.push_back(new Socket());
+		m_Clients.push_back(new StreamSocket());
 		NewClient = m_Clients[m_Clients.size() - 1];
 
-		// 2. Assign cnew connection to last client
+		// 2. Assign new connection to last client
 		Result = m_Listening.AcceptConnection(NewClient);
 		if (Result == INVALID_SOCKET)
 		{
@@ -97,24 +124,21 @@ void Application::HandleConnections()
 		}
 
 		// 3. Create thread to process new client
-		m_ClientThreads.push_back(std::thread(&Application::ProcessClient, this, NewClient, (int)m_Clients.size()));
+		m_ClientThreads.push_back(std::thread(&ServerApplication::ProcessClient, this, NewClient, (int)m_Clients.size()));
 	}
 
 	LOG(LOG_INFO, "Stopped listening for client connections");
 	bRunning = false;
 }
 
-void Application::ProcessClient(Socket* Client, int Id)
+void ServerApplication::ProcessClient(StreamSocket* Client, int Id)
 {
 	FMessage Message;
 	char Buf[MAX_BUF_SIZE];
 
 	LOG(LOG_INFO, "Processing new client");
 
-	memset(&Message, 0, MSG_SIZE);
-	strcpy_s(Message.Name, "SERVER");
-	snprintf(Message.Message, MAX_BUF_SIZE, "Client %d joined chat session!", Id);
-	BroadcastMessage(Message, Client);
+	BroadcastServerMessage("Client %d joined chat session!", Id);
 
 	while (bRunning)
 	{
@@ -133,7 +157,7 @@ void Application::ProcessClient(Socket* Client, int Id)
 
 		// 3. Process message
 		while ((Buf[strlen(Buf) - 1] == '\n')) Buf[strlen(Buf) - 1] = '\0';
-		snprintf(Message.Name, MAX_NAME_SIZE, "CLIENT %d", Id); // Name
+		snprintf(Message.Name, MAX_NAME_SIZE, "@CLIENT %d", Id); // Name
 		strcpy_s(Message.Message, Buf); // Message
 
 		std::cout << Buf << std::endl;
@@ -142,10 +166,7 @@ void Application::ProcessClient(Socket* Client, int Id)
 		BroadcastMessage(Message, Client);
 	}
 
-	memset(&Message, 0, MSG_SIZE);
-	strcpy_s(Message.Name, "SERVER");
-	snprintf(Message.Message, MAX_BUF_SIZE, "Client %d left the session!", Id);
-	BroadcastMessage(Message, Client);
+	BroadcastServerMessage("Client %d left the session!", Id);
 
 	// 5. Close client socket
 	Client->Close();

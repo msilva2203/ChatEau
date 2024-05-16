@@ -3,25 +3,34 @@
 
 #include <iostream>
 
-#include "Application.h"
+#include "ClientApplication.h"
 #include "Socket.h"
 #include "Log.h"
 
-Application App;
+ClientApplication App;
 
 int main(int argc, char** argv)
 {
-	std::string ServerIP = "127.0.0.1";
+	FConfig Config;
 	int Result;
+
+	// 1. Initialize configuration elements
+	memset(&Config, 0, sizeof(Config));
+	Config.IP = "127.0.0.1";
+	Config.Port = PORT;
 
 	if (argc >= 2)
 	{
-		ServerIP = argv[1];
+		Config.IP = argv[1];
+	}
+	if (argc >= 3)
+	{
+		Config.Port = atoi(argv[2]);
 	}
 
 	LOG(LOG_INFO, "Initializing socket system");
 
-	// 1. Initialize socket system
+	// 2. Initialize socket system
 	Result = Socket::Init();
 	if (Result != 0)
 	{
@@ -29,13 +38,13 @@ int main(int argc, char** argv)
 		exit(EXIT_FAILURE);
 	}
 
-	// 2. Run client application
-	LOG(LOG_INFO, "Using IP: %s", ServerIP.c_str());
-	App.Run(ServerIP.c_str());
+	// 3. Configure and run client application
+	App.Configure(Config);
+	App.Run();
 
 	LOG(LOG_INFO, "Cleaning socket system");
 
-	// 3. Cleanup socket system
+	// 4. Cleanup socket system
 	Result = Socket::Cleanup();
 	if (Result != 0)
 	{

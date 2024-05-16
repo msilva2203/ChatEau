@@ -1,57 +1,57 @@
 #include <iostream>
 
-#include "Application.h"
+#include "ClientApplication.h"
 #include "Log.h"
 
-Application::Application() :
-	m_Connection(Socket()),
+ClientApplication::ClientApplication() :
+	m_Connection(StreamSocket()),
 	m_Receiver(),
 	m_InputReader()
 {
 }
 
-void Application::Run(const char* ServerIP)
+void ClientApplication::Run()
 {
 	// 1. Setup connection socket
-	SetupConnectionSocket(ServerIP);
+	SetupConnectionSocket();
 
 	// 2. Create receiver thread
-	m_Receiver = std::thread(&Application::Receiver, this);
+	m_Receiver = std::thread(&ClientApplication::Receiver, this);
 
 	// 3. Create input reader thread
-	m_InputReader = std::thread(&Application::InputReader, this);
+	m_InputReader = std::thread(&ClientApplication::InputReader, this);
 
 	// 4. Join threads
 	m_Receiver.join();
 	m_InputReader.join();
 }
 
-void Application::Close()
+void ClientApplication::Close()
 {
 	LOG(LOG_INFO, "Closing client application");
 
 }
 
-void Application::SetupConnectionSocket(const char* ServerIP)
+void ClientApplication::SetupConnectionSocket()
 {
 	int Result;
 	sockaddr_in Hint;
 
-	// 1. Create socket
-	Result = m_Connection.Create();
+	// 1. Setup hint data
+	Hint.sin_family = AF_INET;
+	Hint.sin_port = htons(m_Config.Port);
+	inet_pton(AF_INET, m_Config.IP.c_str(), &Hint.sin_addr);
+
+	// 2. Create socket
+	Result = m_Connection.Create(Hint);
 	if (Result == INVALID_SOCKET)
 	{
 		LOG(LOG_ERROR, "Failed to create connection socket");
 		exit(EXIT_FAILURE);
 	}
 
-	// 2. Setup hint data
-	Hint.sin_family = AF_INET;
-	Hint.sin_port = htons(PORT);
-	inet_pton(AF_INET, ServerIP, &Hint.sin_addr);
-
 	// 3. Connect socket
-	Result = m_Connection.Connect(Hint);
+	Result = m_Connection.Connect();
 	if (Result == SOCKET_ERROR)
 	{
 		LOG(LOG_ERROR, "Failed to connect socket");
@@ -59,7 +59,7 @@ void Application::SetupConnectionSocket(const char* ServerIP)
 	}
 }
 
-void Application::Receiver()
+void ClientApplication::Receiver()
 {
 	int Received;
 	FMessage Message;
@@ -79,7 +79,7 @@ void Application::Receiver()
 	m_Connection.Close();
 }
 
-void Application::InputReader()
+void ClientApplication::InputReader()
 {
 	int Result;
 	std::string Input;

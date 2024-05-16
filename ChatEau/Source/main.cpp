@@ -1,26 +1,35 @@
 #define WIN32_LEAN_AND_MEAN   
 #include <windows.h>
 
-#include "Application.h"
+#include "ServerApplication.h"
 #include "Log.h"
 
 BOOL WINAPI ConsoleHandler(DWORD);
 
-Application App;
+ServerApplication App;
 
 int main(int argc, char** argv)
 {
-	std::string ServerIP = "127.0.0.1";
+	FConfig Config;
 	int Result;
+
+	// 1. Initialize configuration elements
+	memset(&Config, 0, sizeof(Config));
+	Config.IP = "127.0.0.1";
+	Config.Port = PORT;
 
 	if (argc >= 2)
 	{
-		ServerIP = argv[1];
+		Config.IP = argv[1];
+	}
+	if (argc >= 3)
+	{
+		Config.Port = atoi(argv[2]);
 	}
 
 	LOG(LOG_INFO, "Initializing socket system");
 
-	// 1. Initialize socket system
+	// 2. Initialize socket system
 	Result = Socket::Init();
 	if (Result != 0)
 	{
@@ -34,8 +43,9 @@ int main(int argc, char** argv)
 	//	exit(EXIT_FAILURE);
 	//}
 
-	// 3. Run application
-	App.Run(ServerIP.c_str());
+	// 3. Configure and run the server application
+	App.Configure(Config);
+	App.Run();
 
 	LOG(LOG_INFO, "Cleaning socket system");
 
