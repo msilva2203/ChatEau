@@ -58,7 +58,7 @@ void ServerApplication::BroadcastServerMessage(const char* Content, ...)
 
 	memset(&Message, 0, MSG_SIZE);
 	snprintf(Message.Name, MAX_NAME_SIZE, "@%s", m_Config.Name);
-	snprintf(Message.Message, MAX_BUF_SIZE, Content, Args);
+	vsnprintf(Message.Message, MAX_BUF_SIZE, Content, Args);
 
 	va_end(Args);
 
@@ -98,7 +98,7 @@ int ServerApplication::SetupListeningSocket()
 		return -1;
 	}
 
-	LOG(LOG_INFO, "Socket created with IP address: %s", m_Config.IP.c_str());
+	LOG(LOG_INFO, "Socket created with local address: %s:%d", m_Config.IP.c_str(), m_Config.Port);
 	return 0;
 }
 
@@ -138,8 +138,7 @@ void ServerApplication::ProcessClient(StreamSocket* Client, int Id)
 
 	LOG(LOG_INFO, "Processing new client");
 
-	BroadcastServerMessage("Client %d joined chat session!", Id);
-	std::cout << Id << std::endl;
+	BroadcastServerMessage("Chatter %d joined the session!", Id);
 
 	while (bRunning)
 	{
@@ -158,16 +157,14 @@ void ServerApplication::ProcessClient(StreamSocket* Client, int Id)
 
 		// 3. Process message
 		while ((Buf[strlen(Buf) - 1] == '\n')) Buf[strlen(Buf) - 1] = '\0';
-		snprintf(Message.Name, MAX_NAME_SIZE, "@client %d", Id); // Name
+		snprintf(Message.Name, MAX_NAME_SIZE, "@chatter %d", Id); // Name
 		strcpy_s(Message.Message, Buf); // Message
-
-		std::cout << Buf << std::endl;
 
 		// 4. Send message to other clients
 		BroadcastMessage(Message, Client);
 	}
 
-	BroadcastServerMessage("Client %d left the session!", Id);
+	BroadcastServerMessage("Chatter %d left the session!", Id);
 
 	// 5. Close client socket
 	Client->Close();
