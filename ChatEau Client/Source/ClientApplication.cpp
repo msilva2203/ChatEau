@@ -70,7 +70,7 @@ void ClientApplication::Receiver()
 		Received = m_Connection.Receive(reinterpret_cast<char*>(&Message), MSG_SIZE);
 		if (Received > 0)
 		{
-			std::cout << Message.Name << "> " << Message.Message << std::endl;
+			std::cout << Message.Name << ": " << Message.Message << std::endl;
 			std::cout << ">";
 		}
 
